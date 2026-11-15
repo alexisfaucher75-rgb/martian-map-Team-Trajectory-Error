@@ -2,6 +2,10 @@
 
 **NASA Space Apps Challenge 2026 · "Interplanetary Survival Guide: Martian Map"**
 
+**▶ Live app: https://martian-map-18ce.onrender.com** — click "Try the example: Jezero crater" (EN/FR button at the top). If the page takes ~1 minute to open, the free server is waking up.
+
+Team **Trajectory Error** · research board (FigJam): https://www.figma.com/board/dVRFyXAUmvzSuRV6UeQwrX/Nasa-SpaceApps-challenge
+
 A "Google Maps for Mars" that plans a safe, science-rich Marswalk (on foot or by rover) from real NASA / USGS data:
 
 - **Route planning** — A* search on slope grids built from USGS HiRISE (~1 m), CTX (20 m) and MOLA (463 m) elevation models, refined at ~2 m along the track; steep slopes, loose soil and (optionally) radiation exposure are penalised. Separate outbound and return routes.
