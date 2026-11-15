@@ -1,0 +1,1 @@
+# Aucune dépendance externe : serve.py n'utilise que la bibliothèque standard de Python.

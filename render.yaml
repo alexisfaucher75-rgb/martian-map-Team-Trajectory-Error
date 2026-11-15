@@ -1,0 +1,9 @@
+# Render.com : hébergement gratuit du site + du relais de données (serve.py)
+services:
+  - type: web
+    name: martian-map
+    runtime: python
+    plan: free
+    buildCommand: "echo 'Aucune dépendance : bibliothèque standard Python'"
+    startCommand: "python serve.py"
+    healthCheckPath: /proxy/ping
