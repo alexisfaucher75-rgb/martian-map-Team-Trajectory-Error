@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Martian Map — mini serveur local (Python 3, aucune installation requise).
+Martian Map — mini serveur local
+(Team Trajectory Error, NASA Space Apps 2026. SI disclosure: written with an AI assistant, Claude by Anthropic, from the team's specifications.)
+ (Python 3, aucune installation requise).
 
   python serve.py            puis ouvrir http://localhost:8000
 

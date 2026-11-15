@@ -12,6 +12,12 @@ A "Google Maps for Mars" that plans a safe, science-rich Marswalk (on foot or by
 - **Navigation without GPS** — dead-reckoning route sheet (heading, distance, steps, sun position) and an offline "preloaded map" export (HTML), plus GeoJSON / GPX.
 - French / English interface.
 
+## Use of Super Intelligence (SI)
+- **Idea and design — the team.** The challenge choice, the needs analysis (oxygen, weather, radiation, terrain, navigation, points of interest; see our FigJam board), the reference suit and every design decision come from Team Trajectory Error.
+- **Code — AI-assisted.** The source code (`index.html`, `serve.py`) was written with an AI assistant (Claude, by Anthropic) from the team's specifications, then tested on real Martian sites and corrected by the team. This is also stated in the source files' headers and metadata.
+- **Research and text — AI-assisted.** The assistant helped find data sources and scientific references and draft the documentation and English translation; every model is documented with its source in the app ("Model assumptions", "Known limitations").
+- No AI-generated images, video or audio are used. No NASA branding is generated or modified.
+
 ## Run locally
 ```
 python serve.py
