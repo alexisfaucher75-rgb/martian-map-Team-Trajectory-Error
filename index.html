@@ -343,7 +343,7 @@
     // restes courants : petits mots et ponctuation à la française
     t = t.replace(/(^|[^A-Za-zÀ-ÿ])à(?![A-Za-zÀ-ÿ])/g, "$1at").replace(/(^|[^A-Za-zÀ-ÿ])et(?![A-Za-zÀ-ÿ]|\s+al\.)/g, "$1and")
          .replace(/(^|[^A-Za-zÀ-ÿ])ou(?![A-Za-zÀ-ÿ])/g, "$1or").replace(/ ([:;!?])(?=\s|$)/g, "$1");
-    return lead + t + trail;
+    return (/^[:;!?]/.test(t) ? "" : lead) + t + trail;   // « <b>Retour</b> : … » → "Return: …"
   }
   const trHTML = h => LANG === "en" ? h.replace(/>([^<]+)</g, (m, t) => ">" + tr(t) + "<").replace(/lang="fr"/, 'lang="en"') : h;
   const i18nOrig = new WeakMap(), i18nOut = new WeakMap();
