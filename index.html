@@ -120,41 +120,10 @@
       .layers { top:auto; bottom:44px; max-width:60%; font-size:12px; padding:6px 8px; }
       .row { flex-wrap:wrap; } table.cmp { font-size:11px; }
     }
-
-    /* ---- Sum up ---- */
-    html[lang="en"] .sum-fr, html:not([lang="en"]) .sum-en { display:none !important; }
-    #sumBtn { margin-top:6px; width:100%; background:transparent; border:1px solid var(--accent); color:var(--text); }
-    #sumup { position:fixed; inset:0; z-index:5000; background:rgba(8,6,5,.92); display:flex; align-items:center; justify-content:center; padding:2vh 2vw; overflow:auto; }
-    #sumup[hidden] { display:none; }
-    .ssheet { position:relative; width:min(1600px, 96vw); background:#1a1310; border:1px solid var(--line); border-radius:18px; padding:28px 34px 18px; color:var(--text); }
-    .sclose { position:absolute; top:14px; right:16px; background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:8px; padding:6px 10px; cursor:pointer; font-size:13px; width:auto; }
-    .ssheet h2 { margin:0; font-size:clamp(24px,2.6vw,40px); letter-spacing:-.3px; }
-    .ssheet h2::before { content:"🔴 "; }
-    .ssub { margin:6px 0 18px; color:var(--muted); font-size:clamp(13px,1.1vw,17px); }
-    .sflow { display:grid; grid-template-columns:1fr auto 1.3fr auto 1.2fr auto 1.2fr; align-items:stretch; }
-    .sa { display:flex; align-items:center; padding:0 8px; color:var(--muted); font-size:24px; }
-    .sc { border:2px solid var(--c); border-radius:14px; padding:14px 14px 10px; background:color-mix(in srgb, var(--c) 7%, #1a1310); }
-    .sh { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
-    .sn { width:30px; height:30px; flex:none; border-radius:50%; background:var(--c); color:#14100e; font-weight:800; display:flex; align-items:center; justify-content:center; }
-    .sc h3 { margin:0; font-size:clamp(15px,1.25vw,20px); color:var(--c); line-height:1.15; }
-    .sc small { color:var(--muted); font-size:12px; }
-    .sc ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
-    .sc li b { display:block; font-size:clamp(12.5px,.95vw,15px); }
-    .sc li span { color:var(--muted); font-size:clamp(11.5px,.85vw,13.5px); line-height:1.3; display:block; }
-    .sfoot { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; margin-top:14px; }
-    .sbox { border-radius:10px; padding:10px 14px; font-size:clamp(12px,.9vw,14px); line-height:1.4; color:var(--text); }
-    .sbox i { display:block; font-style:normal; font-weight:700; font-size:11px; letter-spacing:.6px; text-transform:uppercase; margin-bottom:2px; }
-    .sok { background:rgba(95,211,138,.08); border:1px solid rgba(95,211,138,.35); } .sok i { color:var(--ok); }
-    .slim { background:rgba(255,178,56,.08); border:1px solid rgba(255,178,56,.35); } .slim i { color:var(--warn); }
-    .scred { margin-top:10px; text-align:right; color:var(--muted); font-size:11px; }
-    @media (max-width:900px) { .sflow { grid-template-columns:1fr; } .sa { justify-content:center; transform:rotate(90deg); } .sfoot { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
   <div id="map"></div>
-
-  <!-- ===================== SUM UP (vue d'ensemble pour le jury) ===================== -->
-  <div id="sumup" hidden><div class="ssheet"><button id="sumClose" class="sclose" data-notr><span class="sum-fr">✕ Fermer</span><span class="sum-en">✕ Close</span></button><div class="sum-fr" data-notr><h2>Comment fonctionne Martian Map</h2><p class="ssub">Des vraies données martiennes à un plan de sortie sûr — chaque valeur affichée indique sa source et sa fiabilité.</p><div class="sflow"><div class="sc" style="--c:var(--warn)"><div class="sh"><span class="sn">1</span><div><h3>L&#x27;astronaute choisit</h3><small>Entrées</small></div></div><ul><li><b>Départ A et arrivée B</b><span>cliqués sur la carte</span></li><li><b>À pied ou en rover</b><span>scaphandre : xEMU (référence) ou autres · rover : LRV Apollo ou LTV</span></li><li><b>Marge de sécurité O₂</b><span>réserve gardée pour le retour</span></li><li><b>Date et heure de départ</b><span>fixent la saison, le soleil, la température</span></li><li><b>Option : zones abritées</b><span>un peu plus long, mais mieux protégé des radiations</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:#5aa9ff"><div class="sh"><span class="sn">2</span><div><h3>Vraies données, téléchargées en direct</h3><small>serveurs NASA, USGS et ESA</small></div></div><ul><li><b>Relief et pentes</b><span>modèles d&#x27;élévation HiRISE (~1–2 m) si disponibles, sinon CTX (~20 m), sinon MOLA global (~460 m)</span></li><li><b>Sol / sable meuble</b><span>infrarouge de nuit THEMIS : le sable meuble refroidit plus vite que la roche</span></li><li><b>Météo</b><span>Mars Climate Database (ESA/LMD), corrigée par les mesures de Curiosity (REMS) et Perseverance (MEDA) quand elles sont proches</span></li><li><b>Radiations</b><span>débit de dose mesuré par Curiosity (RAD), ajusté selon l&#x27;altitude (pression) et la part du ciel masquée par le relief</span></li><li><b>Géologie</b><span>carte géologique USGS de Mars → unités riches en glace, basalte, failles</span></li><li><b>Heure martienne et soleil</b><span>algorithme Mars24 (NASA GISS)</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:#b28cff"><div class="sh"><span class="sn">3</span><div><h3>Calcul de l&#x27;itinéraire</h3><small>directement dans le navigateur</small></div></div><ul><li><b>Recherche de chemin (algorithme A*)</b><span>chaque pas « coûte » plus cher en pente ou dans le sable ; pentes ≥ 30° interdites</span></li><li><b>Grossier, puis fin à 2 m</b><span>d&#x27;abord sur toute la zone, puis une passe précise dans le couloir choisi</span></li><li><b>Retour calculé séparément</b><span>jamais supposé identique à l&#x27;aller</span></li><li><b>Données alignées</b><span>HiRISE recalé automatiquement sur CTX pour que les pentes soient au bon endroit</span></li><li><b>Givre matinal</b><span>pente maximale abaissée de 5°</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:var(--ok)"><div class="sh"><span class="sn">4</span><div><h3>Rapport de sécurité</h3><small>ce que reçoit l&#x27;équipage</small></div></div><ul><li><b>Aller-retour + verdict</b><span>comparé à la ligne droite</span></li><li><b>Oxygène, eau, nourriture, durée</b><span>O₂ selon l&#x27;effort de marche (pente + sol) ; eau 0,24 L/h (NASA-STD-3001)</span></li><li><b>Dose de radiation</b><span>+ abris naturels tous les ~1,5 km en cas de tempête solaire</span></li><li><b>Alertes météo</b><span>température, vent ≥ 15 m/s, saison des tempêtes</span></li><li><b>Points d&#x27;intérêt</b><span>glace d&#x27;eau, roche de construction, abris</span></li><li><b>Navigation de secours</b><span>carte hors ligne, GPX/GeoJSON, feuille de route à l&#x27;estime (cap, distance, position du soleil)</span></li></ul></div></div><div class="sfoot"><div class="sbox sok"><i>Conçu pour toujours fonctionner</i>Si une source est indisponible, l'appli <b>bascule automatiquement</b> sur une autre (HiRISE → CTX → MOLA ; le sol et la météo ont aussi des secours) et <b>l'indique</b> — le panneau « Diagnostic » affiche chaque vérification en vert ou en rouge.</div><div class="sbox slim"><i>Limites assumées</i>Un <b>outil de planification</b>, non certifié pour le vol : les valeurs sont des estimations de modèles. Le type de sol est relatif à la zone ; le risque de tempête est seulement saisonnier.</div></div><div class="scred">Martian Map · Team Trajectory Error · NASA Space Apps Challenge 2026</div></div><div class="sum-en" data-notr><h2>How Martian Map works</h2><p class="ssub">From real Mars data to a safe walking plan — every value in the app shows its source and how reliable it is.</p><div class="sflow"><div class="sc" style="--c:var(--warn)"><div class="sh"><span class="sn">1</span><div><h3>The astronaut chooses</h3><small>Inputs</small></div></div><ul><li><b>Start A &amp; destination B</b><span>clicked on the map</span></li><li><b>On foot or by rover</b><span>suit: xEMU (reference) or others · rover: Apollo LRV or LTV</span></li><li><b>Oxygen safety margin</b><span>extra reserve kept for the return</span></li><li><b>Date &amp; departure time</b><span>sets season, sunlight, temperature</span></li><li><b>Option: prefer sheltered areas</b><span>trades distance for radiation cover</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:#5aa9ff"><div class="sh"><span class="sn">2</span><div><h3>Real data, downloaded live</h3><small>from NASA, USGS and ESA servers</small></div></div><ul><li><b>Terrain &amp; slopes</b><span>HiRISE elevation models (~1–2 m) where available, else CTX (~20 m), else MOLA global (~460 m)</span></li><li><b>Soil / soft sand</b><span>THEMIS night-time infrared: loose sand cools faster than rock</span></li><li><b>Weather</b><span>Mars Climate Database (ESA/LMD), corrected with Curiosity REMS &amp; Perseverance MEDA measurements when close enough</span></li><li><b>Radiation</b><span>Curiosity RAD surface dose rate, adjusted for altitude (air pressure) and how much sky is hidden by terrain</span></li><li><b>Geology</b><span>USGS geologic map of Mars → ice-rich units, basalt, faults</span></li><li><b>Martian time &amp; Sun</b><span>Mars24 algorithm (NASA GISS)</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:#b28cff"><div class="sh"><span class="sn">3</span><div><h3>Route calculation</h3><small>runs in your browser</small></div></div><ul><li><b>Path-finding (A* algorithm)</b><span>every step “costs” more on steep or sandy ground; slopes ≥ 30° are forbidden</span></li><li><b>Coarse, then fine at 2 m</b><span>first a whole-area search, then a precise pass along the chosen corridor</span></li><li><b>Return trip computed separately</b><span>never assumed to be the same as the way out</span></li><li><b>Data aligned</b><span>HiRISE automatically re-registered on CTX so slopes sit in the right place</span></li><li><b>Morning frost</b><span>max allowed slope lowered by 5°</span></li></ul></div><div class="sa">→</div><div class="sc" style="--c:var(--ok)"><div class="sh"><span class="sn">4</span><div><h3>Safety report</h3><small>what the crew gets</small></div></div><ul><li><b>Route out &amp; back + verdict</b><span>compared with the straight line</span></li><li><b>Oxygen, water, food, duration</b><span>O₂ from walking effort (slope + soil); water 0.24 L/h (NASA-STD-3001)</span></li><li><b>Radiation dose</b><span>+ natural shelters every ~1.5 km for a solar storm</span></li><li><b>Weather alerts</b><span>temperature, wind ≥ 15 m/s, dust-storm season</span></li><li><b>Points of interest</b><span>water ice, building rock, shelters</span></li><li><b>Backup navigation</b><span>offline map, GPX/GeoJSON, dead-reckoning sheet (heading, distance, Sun position)</span></li></ul></div></div><div class="sfoot"><div class="sbox sok"><i>Built to keep working</i>If a dataset is unavailable, the app <b>falls back automatically</b> (HiRISE → CTX → MOLA; soil and weather have backups too) and <b>tells the user</b> which source was used — the “Diagnostic” panel shows every data check in green or red.</div><div class="sbox slim"><i>Honest limits</i>A <b>planning tool</b>, not flight-certified: values are model estimates. Soil type is relative to the area; dust-storm risk is seasonal only.</div></div><div class="scred">Martian Map · Team Trajectory Error · NASA Space Apps Challenge 2026</div></div></div></div>
 
   <!-- ===================== ASSISTANT ===================== -->
   <div class="panel">
@@ -167,7 +136,6 @@
         pentes à 1 m de résolution, oxygène du scaphandre, eau, météo, radiations, type de sol et géologie.</div>
       <div class="hint">Mode d'emploi : choisissez un départ, une date et un scaphandre, placez l'arrivée dans le cercle vert, puis lancez le calcul (30 à 90 s, les données sont téléchargées à la demande).</div>
       <button id="demoBtn">▶ Essayer l'exemple : cratère Jezero (site de Perseverance)</button>
-      <button id="sumBtn" class="ghost" data-notr><span class="sum-fr">📋 Résumé : comment ça marche</span><span class="sum-en">📋 Sum up: how it works</span></button>
       <div class="msg" id="demoMsg"></div>
     </details>
 
@@ -380,7 +348,7 @@
   const trHTML = h => LANG === "en" ? h.replace(/>([^<]+)</g, (m, t) => ">" + tr(t) + "<").replace(/lang="fr"/, 'lang="en"') : h;
   const i18nOrig = new WeakMap(), i18nOut = new WeakMap();
   function trTextNode(n) {
-    const p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName) || p.closest("[data-notr]")) return;
+    const p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName)) return;
     if (!i18nOrig.has(n) || (i18nOut.has(n) && n.nodeValue !== i18nOut.get(n))) i18nOrig.set(n, n.nodeValue);  // texte modifié par l'appli
     const out = LANG === "en" ? tr(i18nOrig.get(n)) : i18nOrig.get(n);
     i18nOut.set(n, out);
@@ -3508,13 +3476,6 @@ ${R.geo.pois.map((p, i) => `<tr><td>G${i + 1}</td><td>${p.icon} ${esc(p.title)}<
     } catch (err) { msg("⚠️ " + err.message); }
     finally { $("demoBtn").disabled = false; }
   };
-
-  // ---- Sum up : vue d'ensemble (bouton dans « À propos ») ----
-  $("sumBtn").onclick = () => { $("sumup").hidden = false; };
-  $("sumClose").onclick = () => { $("sumup").hidden = true; };
-  $("sumup").addEventListener("click", ev => { if (ev.target.id === "sumup") $("sumup").hidden = true; });
-  document.addEventListener("keydown", ev => { if (ev.key === "Escape") $("sumup").hidden = true; });
-  if (/[?&#]sumup\b/.test(location.search + location.hash)) $("sumup").hidden = false;
   setLang(LANG);
   </script>
 </body>
