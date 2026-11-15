@@ -84,6 +84,15 @@
     .kv { display:grid; grid-template-columns:1fr auto; gap:3px 10px; font-size:12.5px; margin-top:10px; }
     .kv div:nth-child(odd) { color:var(--muted); } .kv div:nth-child(even) { text-align:right; font-variant-numeric:tabular-nums; }
     .kv .big { font-size:15px; font-weight:700; color:var(--text); }
+    .keyinfo { margin-top:10px; border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:10px; background:var(--card); }
+    .keyinfo.ok { border-left-color:var(--ok); } .keyinfo.warn { border-left-color:var(--warn); } .keyinfo.err { border-left-color:var(--err); }
+    .ki-h { font-weight:700; font-size:14px; margin-bottom:8px; } .ki-h span { font-weight:400; color:var(--muted); font-size:12px; }
+    .ki-g { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .ki { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:8px; padding:6px 8px; }
+    .ki-t { font-size:11px; color:var(--muted); } .ki-v { font-size:17px; font-weight:700; margin:1px 0; }
+    .ki-s { font-size:10.5px; color:var(--muted); line-height:1.3; }
+    .ki.ok .ki-v { color:var(--ok); } .ki.warn .ki-v { color:var(--warn); } .ki.err .ki-v { color:var(--err); }
+    .ki-f { margin-top:7px; font-size:10.5px; color:var(--muted); }
     .verdict { margin-top:10px; padding:9px 10px; border-radius:8px; font-size:13px; font-weight:600; line-height:1.4; }
     .verdict.ok { background:rgba(95,211,138,.14); color:var(--ok); }
     .verdict.warn { background:rgba(255,178,56,.14); color:var(--warn); }
@@ -348,7 +357,7 @@
   const trHTML = h => LANG === "en" ? h.replace(/>([^<]+)</g, (m, t) => ">" + tr(t) + "<").replace(/lang="fr"/, 'lang="en"') : h;
   const i18nOrig = new WeakMap(), i18nOut = new WeakMap();
   function trTextNode(n) {
-    const p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName)) return;
+    const p = n.parentElement; if (!p || /^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName) || p.closest("[data-notr]")) return;
     if (!i18nOrig.has(n) || (i18nOut.has(n) && n.nodeValue !== i18nOut.get(n))) i18nOrig.set(n, n.nodeValue);  // texte modifié par l'appli
     const out = LANG === "en" ? tr(i18nOrig.get(n)) : i18nOrig.get(n);
     i18nOut.set(n, out);
@@ -385,6 +394,7 @@
     document.title = l === "en" ? "Martian Map — EVA navigation" : "Martian Map — Navigation EVA";
     document.querySelectorAll("#langSeg button").forEach(b => b.classList.toggle("on", b.dataset.lang === l));
     translateTree(document.body);
+    if (typeof state !== "undefined" && state.route) renderResult();   // « Infos importantes » est généré dans la langue choisie
   }
 
   const D2R = Math.PI / 180, R2D = 180 / Math.PI;
@@ -3239,6 +3249,73 @@ ${R.geo.pois.map((p, i) => `<tr><td>G${i + 1}</td><td>${p.icon} ${esc(p.title)}<
   }
 
   const safeHTML = (f, name) => { try { return f(); } catch (e) { diag("render_" + name, `<span class="err">✘ Affichage</span> ${name} — ${e.message}`); return ""; } };
+  // ---- ⭐ Infos importantes : tous les chiffres clés de la sortie au même endroit ----
+  function keyInfoHTML(plan, S, M, route, straight, back, rad, an) {
+    const en = LANG === "en", L = (fr, e) => en ? e : fr;
+    const num = (x, d) => en ? x.toFixed(d) : x.toFixed(d).replace(".", ",");
+    const km = m => num(m / 1000, 2) + " km";
+    const tile = (cls, ico, title, big, sub) => `<div class="ki ${cls}"><div class="ki-t">${ico} ${title}</div><div class="ki-v">${big}</div>${sub ? `<div class="ki-s">${sub}</div>` : ""}</div>`;
+    const o = M.o2, rover = plan.mode === "rover", tiles = [];
+    // 1. Trajet
+    const backTxt = back && back.gap > 30 ? L(`retour ${km(back.L0)} (autre chemin)`, `return ${km(back.L0)} (different path)`) : rover ? L("retour par le même chemin", "return on the same path") : L("retour par le même chemin", "return on the same path");
+    tiles.push(tile("", "📏", L("Distance aller", "Distance (one way)"), route ? km(route.L0) : km(straight.L0),
+      `${backTxt} · ${L("ligne droite", "straight line")} ${km(straight.L0)}`));
+    // 2. Pente
+    const axis = Math.max(M.maxUp, -M.maxDown), axS = Math.max(S.maxUp, -S.maxDown), lim = slopeLimit(plan);
+    tiles.push(tile(axis >= lim ? "err" : axis >= 20 ? "warn" : "ok", "⛰️", L("Pente max sur le trajet", "Max slope on the path"), num(axis, 1) + "°",
+      `${L("ligne droite", "straight line")} ${num(axS, 1)}° · ${L("limite", "limit")} ${lim}°${M.backMaxAxis !== undefined ? ` · ${L("retour", "return")} ${num(M.backMaxAxis, 1)}°` : ""}`));
+    // 3. Durée
+    tiles.push(tile(o.totalHours <= plan.suit.hours ? "ok" : "err", "⏱️", L("Durée totale", "Total duration"), num(o.totalHours, 1) + " h",
+      `${L("autonomie du scaphandre", "suit endurance")} ${plan.suit.hours} h${M.backLtst !== undefined ? ` · ${L("retour à", "back at")} ${hm(M.backLtst)} ${L("(heure solaire locale)", "(local solar time)")}` : ""}`));
+    // 4. Oxygène
+    const pct = 100 * o.total / plan.usable;
+    tiles.push(tile(pct <= 100 ? (pct > 85 ? "warn" : "ok") : "err", "🫁", L("Oxygène nécessaire", "Oxygen needed"), `${o.total.toFixed(0)} g`,
+      `${num(pct, 0)}${L(" %", "%")} ${L("de l'O₂ utilisable", "of usable O₂")} (${plan.usable.toFixed(0)} g) · ${L("marge de sécurité", "safety margin")} ${Math.round(plan.margin * 100)}${L(" %", "%")} ${L("gardée en réserve", "kept in reserve")}`));
+    // 5. Eau
+    const drink = WATER_L_PER_H * o.totalHours;
+    tiles.push(tile(drink <= plan.waterL ? "ok" : "warn", "💧", L("Eau à boire", "Water to drink"), num(drink, 2) + " L",
+      `${L("sur", "out of")} ${num(plan.waterL, 2)} L ${L("emportés", "carried")} (0,24 L/h, NASA-STD-3001)`.replace("0,24", en ? "0.24" : "0,24")));
+    // 6. Nourriture / énergie
+    const kcal = Math.round(o.total / O2_G_PER_WH * KCAL_PER_WH);
+    tiles.push(tile("", "🍫", L("Énergie dépensée", "Energy spent"), `${kcal} kcal`,
+      o.totalHours > 4 ? L(`sortie > 4 h : prévoir ${FOOD_KCAL} kcal dans le scaphandre`, `EVA > 4 h: carry ${FOOD_KCAL} kcal in the suit`) : L("sortie ≤ 4 h : pas de repas nécessaire", "EVA ≤ 4 h: no meal needed")));
+    // 7. Radiations
+    if (rad) {
+      const zs = Number.isFinite(an.prof.z[0]) ? an.prof.z[0] : 0, D = radiationDose(rad, o.totalHours, zs);
+      tiles.push(tile("", "☢️", L("Dose de radiation", "Radiation dose"), num(D.dose, 2) + " mSv",
+        `${L("fourchette", "range")} ${num(D.low, 2)}–${num(D.high, 2)} mSv · ${rad.shelters.length ? `${rad.shelters.length} ${L("abri(s) naturel(s)", "natural shelter(s)")}, ${L("jamais à plus de", "never more than")} ${km(rad.worstReach)}${L("", " away")}` : L("aucun abri naturel", "no natural shelter")}`));
+    }
+    // 8. Météo
+    const T = state.time;
+    if (state.climate && state.climate.diurnal && T) {
+      const a0 = airAt(T.ltst0), a1 = M.backLtst !== undefined ? airAt(M.backLtst) : null, B = modelBias();
+      const w = Number.isFinite(M.windMax) ? M.windMax : NaN;
+      tiles.push(tile(w >= WIND_ALERT ? "warn" : "", "🌡️", L("Température de l'air", "Air temperature"),
+        `${fmtC(a0.c, false)}${a1 ? ` → ${fmtC(a1.c, false)}` : ""}`,
+        `${L("départ → retour", "departure → return")}${Number.isFinite(w) ? ` · ${L("vent max", "max wind")} ${w.toFixed(0)} m/s` : ""} · ${B ? L("modèle corrigé par les mesures du rover", "model corrected with rover data") : L("modèle climatique (MCD)", "climate model (MCD)")}`));
+    }
+    // 9. Sol
+    if (an.prof.ti) {
+      const soft = 100 * (M.soilLen[0] + M.soilLen[1]) / an.L0;
+      tiles.push(tile(soft >= 20 ? "warn" : "ok", "🏜️", L("Sol meuble (sable, poussière)", "Soft ground (sand, dust)"), num(soft, 0) + " %",
+        L("du trajet, d'après l'infrarouge THEMIS (évité si possible)", "of the path, from THEMIS infrared (avoided when possible)")));
+    }
+    // 10. Points d'intérêt
+    const geo = state.route.geo;
+    if (geo) tiles.push(tile("", "🔬", L("Points d'intérêt", "Points of interest"), String(geo.pois.length),
+      L("près du trajet (carte géologique USGS)", "near the path (USGS geologic map)")));
+    // 11. Rover
+    if (rover) tiles.push(tile(2 * an.L0 <= plan.rover.batteryKm * 1000 ? "ok" : "err", "🔋", L("Batterie du rover", "Rover battery"),
+      km(2 * an.L0), `${L("aller-retour, autonomie", "round trip, range")} ${plan.rover.batteryKm} km`));
+    // Données
+    const src = [["HiRISE", 0], ["CTX", 1], ["MOLA", 2]].filter(([, i]) => M.srcLen[i] > 0).map(([t, i]) => `${t} ${(100 * M.srcLen[i] / an.L0).toFixed(0)} %`).join(" · ");
+    return `<div class="keyinfo ${M.cls}" data-notr>
+      <div class="ki-h">⭐ ${L("Infos importantes", "Key information")} <span>${rover ? L("en rover", "by rover") : L("à pied", "on foot")} · ${plan.suit.name.split(" — ")[0]}</span></div>
+      <div class="ki-g">${tiles.join("")}</div>
+      <div class="ki-f">${L("Relief utilisé : ", "Terrain data used: ")}${src}. ${L("Estimations pour la planification — détails et sources plus bas.", "Planning estimates — details and sources below.")}</div>
+    </div>`;
+  }
+
   function renderResult() {
     try { renderResultInner(); }
     catch (err) {
@@ -3262,6 +3339,7 @@ ${R.geo.pois.map((p, i) => `<tr><td>G${i + 1}</td><td>${p.icon} ${esc(p.title)}<
               : `<div class="verdict err">⛔ Aucun itinéraire sûr ${modeTxt}. ${noRouteReason(found)}</div>`}
       ${found.adjusted ? `<div class="msg warn">⚠️ L'arrivée exacte est sur une pente de ${fmtN(found.adjusted.goalSlope, 0, "°")} (limite ${found.limit}°) : elle est inaccessible.
         L'itinéraire s'arrête au point accessible le plus proche (pastille orange), à ${Math.round(found.adjusted.dist)} m de l'arrivée.</div>` : ""}
+      ${safeHTML(() => keyInfoHTML(plan, S, M, route, straight, back, rad, an), "infos importantes")}
       <label style="display:flex;gap:6px;align-items:center;color:var(--text)"><input type="checkbox" id="showArea" style="width:auto" ${state.showArea === false ? "" : "checked"}>
         Afficher les pentes de toute la zone étudiée (violet = interdit)</label>
       <label style="display:flex;gap:6px;align-items:center;color:var(--text)"><input type="checkbox" id="showOrtho" style="width:auto" ${state.showOrtho === false ? "" : "checked"}>
